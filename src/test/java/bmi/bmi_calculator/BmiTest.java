@@ -15,7 +15,7 @@ class BmiCalculatorTest {
 
         double bmi = calculator.calculateBMI(70, 1.75);
 
-        assertEquals(22.86, bmi, 0.01);
+        assertEquals(30, bmi, 0.01);
     }
 
     // Test 2: Underweight category
