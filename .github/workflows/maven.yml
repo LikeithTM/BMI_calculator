@@ -1,0 +1,55 @@
+
+name: BMI Calculator Maven CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Run JUnit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Download source code from GitHub
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Install Java 17
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # Step 3: Run Maven build and JUnit tests
+      - name: Run Maven Tests
+        run: mvn -B clean verify
+
+      # Step 4: Set up Docker Buildx
+      - name: Set up Docker Buildx
+        if: github.event_name == 'push'
+        uses: docker/setup-buildx-action@v3
+
+      # Step 5: Login to Docker Hub
+      - name: Login to Docker Hub
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Step 6: Build and push Docker image
+      - name: Build and Push Docker Image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bmi-calculator:latest
